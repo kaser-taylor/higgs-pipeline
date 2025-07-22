@@ -27,10 +27,18 @@ def load_and_preprocess_data(csv_path):
 
     # set our features and target data
 
-    X = train_df.drop(columns=['EventId', 'Label', 'target', 'KaggleSet', 'KaggleWeight'])
+    X = train_df.drop(columns=['EventId', 'Label', 'target', 'KaggleSet', 'KaggleWeight', 'Weight'])
 
     y = train_df['target']
 
     #Sci-kit learn split 
 
     return train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+def print_col():
+    df = pd.read_csv('data_sets/atlas-higgs-challenge-2014-v2.csv')
+
+    print(df.columns)
+
+
+# print_col()

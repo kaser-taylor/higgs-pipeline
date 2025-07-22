@@ -1,6 +1,7 @@
 import xgboost as xgb
 from etl.data_cleaning import load_and_preprocess_data
 import numpy as np
+import matplotlib.pyplot as plt
 
 X_train, X_val, y_train, y_val = load_and_preprocess_data('data_sets/atlas-higgs-challenge-2014-v2.csv')
 
@@ -19,11 +20,22 @@ params = {
 
 evallist = [(dtrain, 'train'), (dval, 'eval')]
 
+results = {}
+
 bst = xgb.train(
     params,
     dtrain,
     num_boost_round=500,
     early_stopping_rounds=50,
     evals=evallist,
+    evals_result=results,
     verbose_eval=10
 )
+
+eval_auc = results['eval']['auc']
+plt.plot(eval_auc)
+plt.title("Eval AUC Over Training")
+plt.xlabel("Boosting Round")
+plt.ylabel("AUC")
+plt.grid(True)
+plt.show()
