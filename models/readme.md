@@ -65,4 +65,8 @@ params = {
 
 <!-- This created a variable called evallist that is a list containing two touples that track the training and eval data as it trains -->
 
+<!-- XGboost only trains on the training set and then after each round it predicts based on the training set and the evaluation set to gather information like AUC and loss -->
+
 evallist = [(dtrain, 'train'), (dval, 'eval')]
+
+## 
