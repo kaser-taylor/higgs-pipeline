@@ -69,4 +69,34 @@ params = {
 
 evallist = [(dtrain, 'train'), (dval, 'eval')]
 
-## 
+## 23
+
+<!-- This assigns a dictionary to results so we can plot our auc -->
+
+results = {}
+
+## 25-33
+
+<!-- This calls the training function from the XGBoost framework pulling in the parameters, the DMatrix Values, sets the number of training rounds, how many rounds to stop if improvement stagnates, sets train and evaluation sets, and how many rounds to print the metrics  -->
+
+bst = xgb.train(
+    params,
+    dtrain,
+    num_boost_round=1000,
+    early_stopping_rounds=50,
+    evals=evallist,
+    evals_result=results,
+    verbose_eval=10
+)
+
+## 35 - 41
+
+<!-- GPT generated auc pyplot -->
+
+eval_auc = results['eval']['auc']
+plt.plot(eval_auc)
+plt.title("Eval AUC Over Training")
+plt.xlabel("Boosting Round")
+plt.ylabel("AUC")
+plt.grid(True)
+plt.show()

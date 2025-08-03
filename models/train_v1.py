@@ -1,5 +1,5 @@
 import xgboost as xgb
-from etl.data_cleaning import load_and_preprocess_data
+from etl.data_cleaning_simulated_data import load_and_preprocess_data
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -25,7 +25,7 @@ results = {}
 bst = xgb.train(
     params,
     dtrain,
-    num_boost_round=500,
+    num_boost_round=1000,
     early_stopping_rounds=50,
     evals=evallist,
     evals_result=results,
