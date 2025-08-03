@@ -25,7 +25,7 @@ results = {}
 bst = xgb.train(
     params,
     dtrain,
-    num_boost_round=1000,
+    num_boost_round=10000,
     early_stopping_rounds=50,
     evals=evallist,
     evals_result=results,
@@ -39,3 +39,5 @@ plt.xlabel("Boosting Round")
 plt.ylabel("AUC")
 plt.grid(True)
 plt.show()
+
+bst.save_model('model_weights/xgb_higgs_v1.json')

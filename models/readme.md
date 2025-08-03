@@ -9,6 +9,12 @@ Learning XGBoost:
 
 A short GPT class can be found on XGBoost in this convo: https://chatgpt.com/share/687b28d9-da10-8003-b77d-cfe7592c5ea7
 
+# Important Notes
+
+## Validation
+
+For this project, a single train/validation split was used to keep the pipeline simple and reproducible. In a production scenario, cross validation should be implemented. The scope of this project is to produce a data pipeline on AWS. I do believe since the data set is large this split and set of hyperparameters provides a model for this use case.
+
 # Line by Line code explanation
 
 ## 6
@@ -100,3 +106,10 @@ plt.xlabel("Boosting Round")
 plt.ylabel("AUC")
 plt.grid(True)
 plt.show()
+
+
+## 43
+
+<!-- Saves the model into the model_weights folder -->
+
+bst.save_model('/model_weights/xgb_higgs_v1.json')
