@@ -57,3 +57,9 @@ train_df = df[df['KaggleSet'] == 't'].copy()
 X = train_df.drop(columns=['EventId', 'Label', 'target', 'KaggleSet', 'KaggleWeight'])
 
 y = train_df['target']
+
+# Data Cleaning for model train_v2.py
+
+# train_v2.py CHANGES AND EXPLANATIONS
+
+So a problem I ran into a problem where the real data set I identified uses the PHYS_LITE format. This format does not contain the DER_mass_MMC and the PRI_tau_pt features that the simulated ATLAS DATA has. The option that I believe is most within my skill set is to attempt dropping those features from the simulated data and retraining the model.

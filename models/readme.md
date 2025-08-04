@@ -15,7 +15,7 @@ A short GPT class can be found on XGBoost in this convo: https://chatgpt.com/sha
 
 For this project, a single train/validation split was used to keep the pipeline simple and reproducible. In a production scenario, cross validation should be implemented. The scope of this project is to produce a data pipeline on AWS. I do believe since the data set is large this split and set of hyperparameters provides a model for this use case.
 
-# Line by Line code explanation
+# Line by Line code explanation train_v1.py
 
 ## 6
 
@@ -113,3 +113,7 @@ plt.show()
 <!-- Saves the model into the model_weights folder -->
 
 bst.save_model('/model_weights/xgb_higgs_v1.json')
+
+# train_v2.py CHANGES AND EXPLANATIONS
+
+So a problem I ran into a problem where the real data set I identified uses the PHYS_LITE format. This format does not contain the DER_mass_MMC and the PRI_tau_pt features that the simulated ATLAS DATA has. The option that I believe is most within my skill set is to attempt dropping those features from the simulated data and retraining the model.
