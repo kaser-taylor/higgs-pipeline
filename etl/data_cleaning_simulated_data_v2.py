@@ -39,3 +39,4 @@ def print_col():
     df = pd.read_csv('data_sets/atlas-higgs-challenge-2014-v2.csv')
 
     print(df.columns)
+

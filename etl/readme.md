@@ -69,4 +69,8 @@ So a problem I ran into a problem where the real data set I identified uses the 
 1. Read the file keys
 2. Our features are stored in CollectionTree;1
 3. There are so many keys
+5. define an array of the features we want
+6. realize its time for feauture engineering
+
+
 
