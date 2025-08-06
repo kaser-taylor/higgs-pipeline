@@ -7,6 +7,6 @@ pandas,
 # ENV SET UP:
 1. python3 -m venv .venv
 2. source .venv/bin/activate (deactivate to exit)
-3. pip install xgboost pandas scikit-learn
+3. pip install xgboost pandas scikit-learn matplotlib numpy 
 
 got training file set up need to write readme and tune parameters
