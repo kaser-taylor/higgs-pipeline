@@ -56,3 +56,8 @@ The name *hadron* comes from the Greek *hadros*, meaning “thick” or “stron
 In collider physics, hadrons make life messy. Smash protons together and you don’t get nice clean events — you get a **hadronic spray** (jets) as quarks and gluons fragment into more hadrons. That’s why reconstructing something like a hadronic tau decay is like trying to guess the original Lego set from a pile of loose bricks.
 
 Do you want me to contrast hadrons with leptons so the tau/hadron thing clicks completely?
+
+# Basic Particle Physics Video
+
+https://youtu.be/-L5OQp2J46g?si=1JBFcC_A89xbXows
+
