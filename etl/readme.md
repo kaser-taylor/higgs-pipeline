@@ -72,5 +72,6 @@ So a problem I ran into a problem where the real data set I identified uses the 
 5. define an array of the features we want
 6. realize its time for feauture engineering
 
+# Learning Resources for feature construction found in learning-resources/featureconstruction.md
 
 
