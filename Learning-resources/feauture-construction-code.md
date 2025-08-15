@@ -1,8 +1,8 @@
-# line one code
+# line 1 code
 
 import uproot, awkward as ak, numpy as np, vector as vec
 
-# line one explanation, research, and validation
+# line 1 explanation, research, and validation
 
 uprot reads root files, awkward handles jagged, per-event variable length collections, numpy for math, vector gives a vector operations interface
 
@@ -11,14 +11,42 @@ awkward library: This libary is like numpy but for awkward data. It is best used
 vector library: First a vector is a mathematical object that possesses both magnitude (length) and direction. In this branch of physics there are a lot of measurements and data types that contain 3 - 4 vectors. What this library does is allow you to process the math in an effecient and effective way without having to rewrite it every time. GPT brough up lorentz a lot so I am linking a video to lorentz transformations. https://www.youtube.com/watch?v=Rh0pYtQG5wI 
 
 
-# line two code
+# line 2 code
 
 vec.register_awkward()
 
+# line 2 explanation
+
+This line allows the math and classes behind the vector library to live inside the awkward arrays and data structures. Without registering it awkward wouldn't know how to do math on these data types
+
+# line 4 code
 GEV = 1000.0
 
+# line 4 explanation
+
+Particles in the accelerator and their energies are typically measured in MeV and sometimes eV. The kaggle data set uses GeV and the collider uses MeV so this line allows us to do unit conversions later down the line
+
+quotes from gpt for this logic:
+
+ATLAS stores kinematic measurements—like momenta, energies, invariant masses—in MeV by default. That includes things like transverse momentum (pt), energy (E), and mass. When they publish results—say, the W boson mass—they often quote it in MeV, e.g., 80 370 ± 19 MeV 
+home.cern
+.
+
+And yes, it's infuriating: in your ROOT files or official ATLAS open data sets, everything is MeV unless explicitly stated otherwise. It’s like they’re daring you to forget that tiny "M" at the end and feed your model values that are 1000× too big. Because why make your life easier? https://home.cern/news/news/experiments/atlas-releases-first-measurement-w-mass-using-lhc-data?utm_source=chatgpt.com 
+
+Kaggle’s “Higgs Boson Machine Learning Challenge” uses simulated ATLAS data—but whoever packaged it had mercy on you: they typically convert things into GeV. Many Kaggle notebooks, tutorials, and discussions around that competition implicitly treat features—like pt and mass—as GeV. Unfortunately the documentation rarely says so explicitly, but common sense says they wouldn’t expect you to wrestle with MeV in a data science contest—so they likely downscaled everything.
+
+
+
+# line 6 and 7
 with uproot.open("your_file.root") as f:
     t = f["CollectionTree"]  # adjust to actual tree name
+
+# line 6 and 6 explanation
+
+These lines open the file and set t to the section of the file that contains the data. If I get a key error it means the data is named something else
+
+# line 9 - 28 code
 
     arr = t.arrays([
         # Taus
@@ -39,12 +67,34 @@ with uproot.open("your_file.root") as f:
         "MET_Core_AnalysisMETAuxDyn.mpx","MET_Core_AnalysisMETAuxDyn.mpy",
         # Optional cleaning
         "EventInfoAuxDyn.DFCommonJets_eventClean_LooseBad"
+
     ], library="ak")
+
+# line 9-28 explanation
+
+This line gathers all of the primary features we will need for our transformation. We are grabbing taus because the ml model looks for tau tau decay. While they are not strictly tau's they are visible tau decay products that are reconstructed as tau particles. It then grabs muons and electons because in higgs decay one of the tau's decays into a light lepton like a electron or muon. We then grab jets which help the model differentiate background and signal data. MET and Optional cleaning allow us to further differentiate good runs and background signal
+
+Important note about this section:
+
+I used tiered gpt chats to avoid context rot and one of the lower tiers points to an error in the type of tau data that is used. I won't be able to validate this until I run the cleaning script and inference but it will most likely change. 
+
+# line 30
 
 def gev(x): return x/GEV
 
+# line 30 explanation 
+
+This line converts MeV to Gev everywhere it exists because the ML model runs on GeV
+
+
+# line 33 code
+
 # Basic masks
 good_evt = (arr["EventInfoAuxDyn.DFCommonJets_eventClean_LooseBad"] == 0) | ak.is_none(arr["EventInfoAuxDyn.DFCommonJets_eventClean_LooseBad"])
+
+# line 33 explanation
+
+This is line is a pre-screener for the data before it is used. If something was noticeably wrong with the jets or detector it gets a non zero value. All data with a non-zero value should be discared. In a lower tier chat it points out we never pass this as an argument so it never gets sorted so I will add that to the code *Add this tomorrow*
 
 taus = ak.zip({
     "pt":  gev(arr["AnalysisTauJetsAuxDyn.pt"]),
