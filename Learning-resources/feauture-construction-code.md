@@ -96,6 +96,16 @@ good_evt = (arr["EventInfoAuxDyn.DFCommonJets_eventClean_LooseBad"] == 0) | ak.i
 
 This is line is a pre-screener for the data before it is used. If something was noticeably wrong with the jets or detector it gets a non zero value. All data with a non-zero value should be discared. In a lower tier chat it points out we never pass this as an argument so it never gets sorted so I will add that to the code *Add this tomorrow*
 
+# line 35
+
+arr = arr[good_evt]
+
+# line 35 explanation 
+
+This line slices the data and implements the pre-screener to make sure only valid data is kept. 
+
+# line 37-43
+
 taus = ak.zip({
     "pt":  gev(arr["AnalysisTauJetsAuxDyn.pt"]),
     "eta": arr["AnalysisTauJetsAuxDyn.eta"],
@@ -103,7 +113,21 @@ taus = ak.zip({
     "m":   gev(arr["AnalysisTauJetsAuxDyn.m"]),
     "passid": ak.values_astype(arr["AnalysisTauJetsAuxDyn.JetDeepSetLoose"], bool)
 })
+
+# line 37-43 explanation 
+
+ak.zip converts the tau information into awkward record array. This helps group the data into multiple fields inside one object
+the fields are then passed in as argumente and some of the fields like pt and m which have energy like quantities call the gev helper function to do the unit conversion.
+
+the final line makes sure that tau values which normally come in 0 or 1 for true or false are converted to boolean true false to ensure theres no python bugs later
+
+# line 44
+
 taus = taus[(taus.pt > 25) & (abs(taus.eta) < 2.5) & taus.passid]
+
+# line 44 explanation
+
+The next line further prunes our acceptable tau's. We look for a transverse momentum higher than 25 because tau's are heavy particles and need to travel far. if we use a lower transverse momentum this includes leptons that aren't the kind we're looking for. this is indicated in the taus.pt > 25. the next bit taus.eta limits how much of the detector we look at. As you get farther from the center of the detector the resolution of the data lowers and may provide an innaccurate picture so this allows us to have a good resolution. the last line keeps tau's that pass a built in ml classifier that throws out noise or bad leptons. 
 
 mus = ak.zip({
     "pt":  gev(arr["AnalysisMuonsAuxDyn.pt"]),
