@@ -129,13 +129,28 @@ taus = taus[(taus.pt > 25) & (abs(taus.eta) < 2.5) & taus.passid]
 
 The next line further prunes our acceptable tau's. We look for a transverse momentum higher than 25 because tau's are heavy particles and need to travel far. if we use a lower transverse momentum this includes leptons that aren't the kind we're looking for. this is indicated in the taus.pt > 25. the next bit taus.eta limits how much of the detector we look at. As you get farther from the center of the detector the resolution of the data lowers and may provide an innaccurate picture so this allows us to have a good resolution. the last line keeps tau's that pass a built in ml classifier that throws out noise or bad leptons. 
 
+
+# line 46-51
 mus = ak.zip({
     "pt":  gev(arr["AnalysisMuonsAuxDyn.pt"]),
     "eta": arr["AnalysisMuonsAuxDyn.eta"],
     "phi": arr["AnalysisMuonsAuxDyn.phi"],
     "passid": ak.values_astype(arr["AnalysisMuonsAuxDyn.DFCommonMuonPassPreselection"], bool)
 })
+
+# line 46-51 explanation
+
+This section is pretty similar to the tau section but is focused on Muons. The first like converts the transverse momemntum into GeV. The second line grabs the pseudorapidity which is the angle from the beam and the third grabs azimuthal angle which is which direction in the cylinder it went. the final line is the baseline preselection like with taus that tells us if the data is valid
+
+# line 52
 mus = mus[(mus.pt > 20) & (abs(mus.eta) < 2.5) & mus.passid]
+
+# line 52 explanation
+
+This is similar to line 44 but is shortens the depth of the detector because muons are lighter and don't travel as far. 
+
+
+# line 54 - 61
 
 els = ak.zip({
     "pt":  gev(arr["AnalysisElectronsAuxDyn.pt"]),
@@ -145,6 +160,10 @@ els = ak.zip({
 }, with_name="Momentum4D")  # optional
 
 els = els[(els.pt > 20) & (abs(els.eta) < 2.47) & els.passid]
+
+# line 54 - 61 explanation
+
+This is the same as the last two sections but for electrons. The detector range is shortened slightly as well because electrons are lighter and don't travel as far
 
 # Choose exactly one lepton: highest-pt among e/mu
 both = ak.concatenate([els, mus], axis=1)
