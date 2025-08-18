@@ -165,13 +165,30 @@ els = els[(els.pt > 20) & (abs(els.eta) < 2.47) & els.passid]
 
 This is the same as the last two sections but for electrons. The detector range is shortened slightly as well because electrons are lighter and don't travel as far
 
+# line 63 - 66
+
 # Choose exactly one lepton: highest-pt among e/mu
 both = ak.concatenate([els, mus], axis=1)
 lep = both[ak.singletons(ak.argmax(both.pt, axis=1, keepdims=False))]
 lep = ak.firsts(lep)
 
+# line 63-66 explanation
+This section is used to weed out which leptons are going to matter for our model. When the higgs goes through tt decay there is an energy bump around 125 Gev. This is considerably higher than most other things that result in lepton decay like z bosons (about 91 GeV). This means that if we do find leptons that are going to likely be a higgs its going to most likely be a leading lepton. Many of these leading leptons will be backgroud noise because there are many things that result in lepton decay but it is still important to narrow our candidates. 
+
+There ares some edge cases that need to be added but this will be done in another section
+
+# line 68 - 69
+
 # One tau: highest pt
 tau = ak.firsts(taus[ak.singletons(ak.argmax(taus.pt, axis=1))])
+
+# line 64-69 explanation
+
+So this line looks through our tau's and finds tau's with the highest transverse momementum and then passes those through a series of functions into an awkward data type for processing later
+
+this is similar to the light letpson lines above. 
+
+# line 71 - 78
 
 # Jets
 jets = ak.zip({
@@ -185,6 +202,10 @@ jets = jets[(jets.pt > 30) & (abs(jets.eta) < 4.5) & (~jets.bad)]
 jets = jets[ak.argsort(jets.pt, ascending=False)]
 j1 = ak.firsts(jets)
 j2 = ak.firsts(ak.pad_none(jets, 2)[:,1])
+
+# line 71 - 78 explanation
+
+
 
 # MET
 mpx = gev(arr["MET_Core_AnalysisMETAuxDyn.mpx"])
