@@ -177,7 +177,7 @@ This section is used to weed out which leptons are going to matter for our model
 
 There ares some edge cases that need to be added but this will be done in another section
 
-# line 68 - 69
+# line 68-69
 
 # One tau: highest pt
 tau = ak.firsts(taus[ak.singletons(ak.argmax(taus.pt, axis=1))])
@@ -188,7 +188,7 @@ So this line looks through our tau's and finds tau's with the highest transverse
 
 this is similar to the light letpson lines above. 
 
-# line 71 - 78
+# line 71-78
 
 # Jets
 jets = ak.zip({
@@ -203,15 +203,23 @@ jets = jets[ak.argsort(jets.pt, ascending=False)]
 j1 = ak.firsts(jets)
 j2 = ak.firsts(ak.pad_none(jets, 2)[:,1])
 
-# line 71 - 78 explanation
+# line 71-78 explanation
 
+This section is similar to the tau and lepton zip up. We gather the data of the jets, throw out bad data with isBadBatman, and then clean it further based on detector range. We do grab a trailing jet in this because it is important for identifying signal vs. noise later. 
 
+# line 84-88
 
 # MET
 mpx = gev(arr["MET_Core_AnalysisMETAuxDyn.mpx"])
 mpy = gev(arr["MET_Core_AnalysisMETAuxDyn.mpy"])
 met = np.sqrt(mpx*mpx + mpy*mpy)
 met_phi = np.arctan2(mpy, mpx)
+
+# line 84-88 explanation
+
+When the higgs decays it produces a range of particles and some of those are neutrinos. neutrinos are too small to interact with the dector. This line of code helps us identify the amount of missing energy in the form of neutrinos.
+
+# line 90-92
 
 # Four-vectors
 def p4(o):

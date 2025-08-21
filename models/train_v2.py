@@ -40,4 +40,4 @@ plt.ylabel("AUC")
 plt.grid(True)
 plt.show()
 
-bst.save_model('model_weights/xgb_higgs_v2.json')
+# bst.save_model('model_weights/xgb_higgs_v2.json')
