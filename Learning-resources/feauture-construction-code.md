@@ -225,15 +225,33 @@ When the higgs decays it produces a range of particles and some of those are neu
 def p4(o):
     return vec.obj(pt=o.pt, eta=o.eta, phi=o.phi, mass=ak.fill_none(o.m if "m" in o.fields else 0, 0))
 
+# line 90-92 explanation
+
+Earlier in our code we registerd the awkward arrays as records. This line of code takes those awkward arrays and turns them into lorentz vectors
+
+# line 94-97
+
 lep4 = vec.obj(pt=lep.pt, eta=lep.eta, phi=lep.phi, mass=0)  # approx massless
 tau4 = p4(tau)
 j14  = p4(j1)
 j24  = p4(j2)
 
+# line 94-97 explanation
+
+This line ensures that all of our values can be bassed into the p4 functions above in a safe manner even if there is missing data. 
+
+# line 99-102
+
 # Helper
 def dphi(phi1, phi2):
     d = phi1 - phi2
     return np.arctan2(np.sin(d), np.cos(d))
+
+# line 99-102 explanation
+
+This helper function allows use to subtract angles in relation to a circle by limiting it to -pi to pi. This is important because if you just subract angles regularly with a function like a1 - a2 a1 = pi and a2 = -pi then you get an answer around 2 pi. This adds bounds to ensure we get a true angle difference closer to pi. The atlas detector is essentially a massive cyclinder of smaller detectors surrounding the particle beam so when we are working with azimuthal angles it is like working with a circle. 
+
+# line 104-118
 
 # PRI_*
 PRI_lep_pt  = lep.pt
@@ -249,6 +267,8 @@ PRI_jet_subleading_pt  = ak.fill_none(j2.pt,  -999)
 PRI_jet_subleading_eta = ak.fill_none(j2.eta, -999)
 PRI_jet_subleading_phi = ak.fill_none(j2.phi, -999)
 PRI_jet_all_pt = ak.sum(jets.pt, axis=1)
+
+# line 104-117 explanation
 
 # DER_*
 DER_mass_transverse_met_lep = np.sqrt(2*PRI_lep_pt*PRI_met*(1 - np.cos(dphi(PRI_lep_phi, PRI_met_phi))))
