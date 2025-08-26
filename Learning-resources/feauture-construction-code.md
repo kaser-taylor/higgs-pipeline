@@ -268,7 +268,11 @@ PRI_jet_subleading_eta = ak.fill_none(j2.eta, -999)
 PRI_jet_subleading_phi = ak.fill_none(j2.phi, -999)
 PRI_jet_all_pt = ak.sum(jets.pt, axis=1)
 
-# line 104-117 explanation
+# line 104-118 explanation
+
+so this gathers all of our primary features and gets them ready to both be used to construct our derived features and to be loaded into a pd data frame for later cleaning 
+
+# line 119-148
 
 # DER_*
 DER_mass_transverse_met_lep = np.sqrt(2*PRI_lep_pt*PRI_met*(1 - np.cos(dphi(PRI_lep_phi, PRI_met_phi))))
@@ -301,6 +305,12 @@ DER_lep_eta_centrality = ak.where(
 
 DER_pt_ratio_lep_tau = ak.where(tau4.pt > 0, PRI_lep_pt / tau4.pt, -999)
 
+# line 119-148 explanation 
+
+This part is a little beyond me. This is the construction of our derived features. While validating it gpt has pointed out some mathematical differences between the kaggle set and the atlas set and these will be covered in our second pass through to find mistakes 
+
+
+# line 150-177
 # Now package into a pandas DataFrame if you want
 import pandas as pd
 df = pd.DataFrame({
@@ -329,3 +339,6 @@ df = pd.DataFrame({
     "PRI_jet_subleading_phi": ak.to_numpy(PRI_jet_subleading_phi),
     "PRI_jet_all_pt": ak.to_numpy(PRI_jet_all_pt)
 })
+
+# line 150-177 explanation
+This is pretty simply and just packs our primary and derived features into a pandas dataframe.
