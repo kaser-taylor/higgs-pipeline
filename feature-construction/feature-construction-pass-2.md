@@ -37,6 +37,7 @@ def gev(x): return x/GEV
 # Basic masks
 good_evt = (arr["EventInfoAuxDyn.DFCommonJets_eventClean_LooseBad"] == 0) | ak.is_none(arr["EventInfoAuxDyn.DFCommonJets_eventClean_LooseBad"])
 
+# makes sure the array is actually a good event 
 arr = arr[good_evt]
 
 taus = ak.zip({
@@ -116,6 +117,32 @@ def dphi(phi1, phi2):
     d = phi1 - phi2
     return np.arctan2(np.sin(d), np.cos(d))
 
+# adds an object cleaner to take the strongest signal in clustered data 
+
+def delta_r(eta1, phi1, eta2, phi2):
+    return np.hypot(eta1 - eta2, dphi(phi1, phi2))
+
+def overlap_removal(lep, taus, jets, dr_lt=0.2, dr_lj=0.4, dr_tj=0.2):
+
+# 1 Lepton–tau: remove taus too close to the lepton
+    # Broadcasts taus.* against scalar-ish lep.* per event.
+    dr_tau_lep = delta_r(taus.eta, taus.phi, lep.eta, lep.phi)
+    taus_clean = taus[dr_tau_lep > dr_lt]
+
+# 2 Lepton–jet: remove jets too close to the lepton
+    dr_jet_lep = delta_r(jets.eta, jets.phi, lep.eta, lep.phi)
+    jets_step1 = jets[dr_jet_lep > dr_lj]
+
+# 3 Tau–jet: for each jet, check distance to any surviving tau; if any tau is too close, drop the jet
+    pairs = ak.cartesian({"j": jets_step1, "t": taus_clean}, nested=True)  # per-event all pairs
+    dr_j_tau = delta_r(pairs["j"].eta, pairs["j"].phi, pairs["t"].eta, pairs["t"].phi)
+
+    # For events with zero taus, dr_j_tau is empty; ak.any(..., axis=-1) returns False -> keep jets
+    too_close_to_any_tau = ak.any(dr_j_tau < dr_tj, axis=-1)   # shape matches jets_step1
+    jets_clean = jets_step1[~too_close_to_any_tau]
+
+    return taus_clean, jets_clean
+
 # PRI_*
 PRI_lep_pt  = lep.pt
 PRI_lep_eta = lep.eta
@@ -144,8 +171,6 @@ def px(pt,phi): return pt*np.cos(phi)
 def py(pt,phi): return pt*np.sin(phi)
 
 # Use up to 2 jets for Kaggle-like behavior
-sum_px = lep4.px + tau4.px + ak.fill_none(j14.px, 0) + ak.fill_none(j24.px, 0) + met*np.cos(met_phi)
-sum_py = lep4.py + tau4.py + ak.fill_none(j14.py, 0) + ak.fill_none(j24.py, 0) + met*np.sin(met_phi)
 DER_pt_tot = np.hypot(sum_px, sum_py)
 
 DER_sum_pt = PRI_lep_pt + tau4.pt + ak.fill_none(j14.pt,0) + ak.fill_none(j24.pt,0) + PRI_met
@@ -156,9 +181,10 @@ DER_mass_jet_jet     = ak.where(has2, (j14 + j24).mass, -999)
 DER_prodeta_jet_jet  = ak.where(has2, j14.eta * j24.eta, -999)
 DER_lep_eta_centrality = ak.where(
     has2,
-    2*(lep4.eta - 0.5*(j14.eta + j24.eta)) / np.abs(j14.eta - j24.eta),
-    -999
+    np.exp(-4.0 * ((lep4.eta - 0.5*(j14.eta + j24.eta)) ** 2) / ((j14.eta - j24.eta) ** 2 + 1e-12)),
+    -999.0
 )
+
 
 DER_pt_ratio_lep_tau = ak.where(tau4.pt > 0, PRI_lep_pt / tau4.pt, -999)
 
@@ -190,3 +216,13 @@ df = pd.DataFrame({
     "PRI_jet_subleading_phi": ak.to_numpy(PRI_jet_subleading_phi),
     "PRI_jet_all_pt": ak.to_numpy(PRI_jet_all_pt)
 })
+
+df = df.astype("float64")
+
+for k in ["EventInfoAuxDyn.runNumber", "EventInfoAuxDyn.evenNumber"]:
+    if k in ak.fields(arr);
+    df[k.split(".")[-1]] = ak.to_numpy(arr[k]).astype("int64")
+
+out_dir = "data_sets/cleaned_atlas"
+part_id = f"part-{chunk_idx:05d}.parquet"
+df.to_parquet(f"{out_dir}/{part_id}", index=False, compression="ztsd")
