@@ -6,8 +6,8 @@ vec.register_awkward()
 
 GEV = 1000.0
 
-with uproot.open("your_file.root") as f:
-    t = f["CollectionTree"]  # adjust to actual tree name
+with uproot.open("data_sets/DAOD_PHYSLITE.37001626._000011.pool.root.1") as f:
+    t = f["CollectionTree;1"]  # adjust to actual tree name
 
     arr = t.arrays([
         # Taus
@@ -23,7 +23,7 @@ with uproot.open("your_file.root") as f:
         # Jets
         "AnalysisJetsAuxDyn.pt","AnalysisJetsAuxDyn.eta",
         "AnalysisJetsAuxDyn.phi","AnalysisJetsAuxDyn.m",
-        "AnalysisJetsAuxDyn.DFCommonJets_isBadBatman",
+        "EventInfoAuxDyn.DFCommonJets_isBadBatman",
         # MET
         "MET_Core_AnalysisMETAuxDyn.mpx","MET_Core_AnalysisMETAuxDyn.mpy",
         # Optional cleaning
@@ -63,7 +63,7 @@ els = ak.zip({
 
 els = els[(els.pt > 20) & (abs(els.eta) < 2.47) & els.passid]
 
-have_lep = (ak.num(els) + ak.nums(mus)) > 0
+have_lep = (ak.num(els) + ak.num(mus)) > 0
 els = els[have_lep]
 mus = mus[have_lep]
 
@@ -74,17 +74,32 @@ have_tau = ak.num(taus) > 0
 taus = taus[have_tau]
 tau  = ak.firsts(taus[ak.singletons(ak.argmax(taus.pt, axis=1))])
 
+
 jets = ak.zip({
     "pt":  gev(arr["AnalysisJetsAuxDyn.pt"]),
     "eta": arr["AnalysisJetsAuxDyn.eta"],
     "phi": arr["AnalysisJetsAuxDyn.phi"],
     "m":   gev(arr["AnalysisJetsAuxDyn.m"]),
-    "bad": ak.values_astype(arr["AnalysisJetsAuxDyn.DFCommonJets_isBadBatman"], bool)
-})
-jets = jets[(jets.pt > 30) & (abs(jets.eta) < 4.5) & (~jets.bad)]
+}, depth_limit=2)
+
+print(ak.type(jets))
+print(jets[0, 0])
+# print(ak.type(arr["AnalysisJetsAuxDyn.pt"]))
+
+bad_batman = arr["EventInfoAuxDyn.DFCommonJets_isBadBatman"]
+loosebad   = arr["EventInfoAuxDyn.DFCommonJets_eventClean_LooseBad"]
+bad_event = bad_batman | loosebad
+
+jets = jets[(jets.pt > 30) & (abs(jets.eta) < 4.5)]
+jets= jets[~bad_event]
+
 jets = jets[ak.argsort(jets.pt, ascending=False)]
 j1 = ak.firsts(jets)
-j2 = ak.firsts(ak.pad_none(jets, 2)[:,1])
+j2 = ak.pad_none(jets, 2, clip=True)[..., 1]
+
+print(j1[0])
+print(j2[0])
+
 
 mpx = gev(arr["MET_Core_AnalysisMETAuxDyn.mpx"])
 mpy = gev(arr["MET_Core_AnalysisMETAuxDyn.mpy"])
@@ -93,11 +108,35 @@ met_phi = np.arctan2(mpy, mpx)
 
 def p4(o):
     return vec.obj(pt=o.pt, eta=o.eta, phi=o.phi, mass=ak.fill_none(o.m if "m" in o.fields else 0, 0))
+lep4 = vec.awk(ak.zip({
+    "pt": lep.pt,
+    "eta": lep.eta,
+    "phi": lep.phi,
+    "mass": ak.zeros_like(lep.pt),  # massless approx
+}))
+ # approx massless
+tau4 = vec.awk(ak.zip({
+    "pt": tau.pt,
+    "eta": tau.eta,
+    "phi": tau.phi,
+    "mass": tau.m,
+}))
 
-lep4 = vec.obj(pt=lep.pt, eta=lep.eta, phi=lep.phi, mass=0)  # approx massless
-tau4 = p4(tau)
-j14  = p4(j1)
-j24  = p4(j2)
+
+j14 = vec.awk(ak.zip({
+    "pt": j1.pt,
+    "eta": j1.eta,
+    "phi": j1.phi,
+    "mass": j1.m,
+}))
+
+j24 = vec.awk(ak.zip({
+    "pt": j2.pt,
+    "eta": j2.eta,
+    "phi": j2.phi,
+    "mass": j2.m,
+}))
+
 
 def dphi(phi1, phi2):
     d = phi1 - phi2
