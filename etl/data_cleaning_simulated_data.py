@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
@@ -12,31 +12,36 @@ def load_and_preprocess_data(csv_path):
     print(df.head())
     print(df.info())
 
-    # the parameters mean replace all -999.0 with a np nan inplace in the dataframe so it does not return a copy
+    # the parameters mean replace all -999.0
+    # with a np nan inplace in the dataframe so it does not return a copy
     df.replace(-999.0, np.nan, inplace=True)
 
-    # sums up, sorts the data beforehand, and reports the top 10 columns with missing numbers
+    # sums up, sorts the data beforehand, and reports
+    #  the top 10 columns with missing numbers
     print(df.isna().sum().sort_values(ascending=False).head(10))
 
-    #encodes the target
+    # encodes the target
 
-    df['target'] = (df['Label'] == 's').astype(int)
+    df["target"] = (df["Label"] == "s").astype(int)
 
-    #filter out training rows
-    train_df = df[df['KaggleSet'] == 't'].copy()
+    # filter out training rows
+    train_df = df[df["KaggleSet"] == "t"].copy()
 
     # set our features and target data
 
-    X = train_df.drop(columns=['EventId', 'Label', 'target', 'KaggleSet', 'KaggleWeight', 'Weight'])
+    X = train_df.drop(
+        columns=["EventId", "Label", "target", "KaggleSet", "KaggleWeight", "Weight"]
+    )
 
-    y = train_df['target']
+    y = train_df["target"]
 
-    #Sci-kit learn split 
+    # Sci-kit learn split
 
     return train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
+
 def print_col():
-    df = pd.read_csv('data_sets/atlas-higgs-challenge-2014-v2.csv')
+    df = pd.read_csv("data_sets/atlas-higgs-challenge-2014-v2.csv")
 
     print(df.columns)
 
