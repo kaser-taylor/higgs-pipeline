@@ -1,5 +1,33 @@
 /data_sets
 
+#terraform
+# Local Terraform state
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Terraform working dir
+.terraform/
+.terraform.lock.hcl
+
+# Sensitive variable files
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Override configs (often local hacks)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# OS/editor junk
+.DS_Store
+*.swp
+
+
 # Local creds
 .env
 *.pem
