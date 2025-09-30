@@ -58,3 +58,7 @@ __pycache__/
 # IDE/editor junk
 .vscode/
 .idea/
+
+tfplan
+.tfplan
+/tfplan
