@@ -12,7 +12,7 @@ terraform {
 # sets the provider and the region in the provider
 provider "aws" {
   region  = var.region
-  profile = "higgs-pipeline"
+  profile = "var.aws_profile"
 }
 
 /* 
@@ -180,6 +180,11 @@ variable "alert_email" {
 variable "monthly_limit_usd" {
   type    = string
   default = "5"
+}
+
+variable "aws_profile" {
+  type    = string
+  default = " "
 }
 
 

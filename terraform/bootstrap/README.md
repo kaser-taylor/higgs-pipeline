@@ -12,3 +12,5 @@ Set up Identity Center
 Assign Admin permission set
 
 These two items were done in the console
+
+https://www.youtube.com/watch?v=aOoRaVuh8Lc watch later for oidc
