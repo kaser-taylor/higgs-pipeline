@@ -1,19 +1,19 @@
   repos:
   # Secret scanning
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.28.0
+    rev: v8.30.0
     hooks:
       - id: gitleaks
 
   # Code formatting
   - repo: https://github.com/psf/black
-    rev: 25.9.0
+    rev: 26.1.0
     hooks:
       - id: black
 
   # Import sorting
   - repo: https://github.com/pycqa/isort
-    rev: 6.0.1
+    rev: 7.0.0
     hooks:
       - id: isort
 
@@ -25,14 +25,14 @@
 
   # Secret scanning
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.28.0
+    rev: v8.30.0
     hooks:
       - id: gitleaks
         args: ["--redact"]
 
   # Terraform helpers
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.100.1
+    rev: v1.105.0
     hooks:
         - id: terraform_fmt
         - id: terraform_validate

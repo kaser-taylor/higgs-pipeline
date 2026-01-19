@@ -33,6 +33,7 @@ override.tf.json
 *.pem
 *.key
 *credentials*
+*.hcl
 
 # AWS CLI config (don’t push these!)
 .aws/
@@ -62,3 +63,5 @@ __pycache__/
 tfplan
 .tfplan
 /tfplan
+
+/darwin_arm64
