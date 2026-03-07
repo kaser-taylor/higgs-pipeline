@@ -7,7 +7,6 @@ variable "region" {
 variable "aws_profile" {
   type        = string
   description = "Optional AWS CLI profile name (SSO profile name, etc). Leave empty to use env vars/instance role."
-  default     = ""
 }
 
 variable "project" {
@@ -28,15 +27,6 @@ variable "extra_tags" {
   default     = {}
 }
 
-variable "bucket_name" {
-  type        = string
-  description = "Globally-unique S3 bucket name."
-
-  validation {
-    condition     = can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", var.bucket_name))
-    error_message = "bucket_name must be a valid S3 bucket name (lowercase, 3-63 chars, letters/numbers/dot/hyphen)."
-  }
-}
 
 variable "ingestion_prefix" {
   type        = string
@@ -80,9 +70,11 @@ variable "force_destroy" {
 variable "etl_lambda_role_name" {
   type        = string
   description = "Existing IAM role name used by the ETL Lambda function."
+  default     = "higgs_lambda_role"
 }
 
 variable "predictions_role_name" {
   type        = string
   description = "Existing IAM role name used by the predictions container runtime (e.g., ECS task role)."
+  default     = "higgs_ecs_role"
 }

@@ -1,12 +1,82 @@
 data "aws_caller_identity" "me" {}
 
-data "aws_iam_role" "etl_lambda" {
-  name = var.etl_lambda_role_name
+locals {
+  bucket_name = "higgs-${var.env}-data-${data.aws_caller_identity.me.account_id}"
 }
 
-data "aws_iam_role" "predictions" {
-  name = var.predictions_role_name
+resource "aws_iam_role" "etl_lambda" {
+  name = var.etl_lambda_role_name
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect    = "Allow",
+      Principal = { Service = "lambda.amazonaws.com" },
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Project     = var.project
+    Environment = var.env
+    Component   = "etl"
+    ManagedBy   = "terraform"
+  }
 }
+
+# Minimum: allow Lambda to write CloudWatch logs
+resource "aws_iam_role_policy_attachment" "etl_lambda_basic_execution" {
+  role       = aws_iam_role.etl_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+
+resource "aws_iam_role" "predictions_task" {
+  name = var.predictions_role_name
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect    = "Allow",
+      Principal = { Service = "ecs-tasks.amazonaws.com" },
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Project     = var.project
+    Environment = var.env
+    Component   = "predictions-task"
+    ManagedBy   = "terraform"
+  }
+}
+
+resource "aws_iam_role" "predictions_execution" {
+  name = "${var.project}-${var.env}-predictions-exec"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect    = "Allow",
+      Principal = { Service = "ecs-tasks.amazonaws.com" },
+      Action    = "sts:AssumeRole"
+    }]
+  })
+
+  tags = {
+    Project     = var.project
+    Environment = var.env
+    Component   = "predictions-exec"
+    ManagedBy   = "terraform"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "predictions_execution_managed" {
+  role       = aws_iam_role.predictions_execution.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+
 
 locals {
   # Normalize prefixes so we can safely build ARNs
@@ -21,9 +91,20 @@ locals {
 }
 
 resource "aws_s3_bucket" "data" {
-  bucket        = var.bucket_name
+  bucket        = local.bucket_name
   force_destroy = var.force_destroy
 }
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
+  bucket = aws_s3_bucket.data.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
 
 # Explicitly ensure versioning is NOT enabled
 resource "aws_s3_bucket_versioning" "data" {
@@ -120,12 +201,12 @@ data "aws_iam_policy_document" "etl_access" {
 
 resource "aws_iam_policy" "etl_access" {
   name        = "${var.project}-${var.env}-etl-s3-access"
-  description = "ETL Lambda access: read ingestion/, write cleaned/ in ${var.bucket_name}"
+  description = "ETL Lambda access: read ingestion/, write cleaned/ in ${local.bucket_name}"
   policy      = data.aws_iam_policy_document.etl_access.json
 }
 
 resource "aws_iam_role_policy_attachment" "etl_access" {
-  role       = data.aws_iam_role.etl_lambda.name
+  role       = aws_iam_role.etl_lambda.name
   policy_arn = aws_iam_policy.etl_access.arn
 }
 
@@ -160,12 +241,12 @@ data "aws_iam_policy_document" "predictions_access" {
 
 resource "aws_iam_policy" "predictions_access" {
   name        = "${var.project}-${var.env}-predictions-s3-access"
-  description = "Predictions runtime access: read cleaned/ in ${var.bucket_name}"
+  description = "Predictions runtime access: read cleaned/ in ${local.bucket_name}"
   policy      = data.aws_iam_policy_document.predictions_access.json
 }
 
 resource "aws_iam_role_policy_attachment" "predictions_access" {
-  role       = data.aws_iam_role.predictions.name
+  role       = aws_iam_role.predictions_task.name
   policy_arn = aws_iam_policy.predictions_access.arn
 }
 
@@ -210,7 +291,7 @@ data "aws_iam_policy_document" "bucket_policy" {
 
     principals {
       type        = "AWS"
-      identifiers = [data.aws_iam_role.etl_lambda.arn]
+      identifiers = [aws_iam_role.etl_lambda.arn]
     }
 
     resources = [
@@ -242,7 +323,7 @@ data "aws_iam_policy_document" "bucket_policy" {
 
     principals {
       type        = "AWS"
-      identifiers = [data.aws_iam_role.predictions.arn]
+      identifiers = [aws_iam_role.predictions_task.arn]
     }
 
     resources = [
