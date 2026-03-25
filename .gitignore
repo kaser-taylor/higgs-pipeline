@@ -10,6 +10,7 @@ crash.*.log
 # Terraform working dir
 .terraform/
 .terraform.lock.hcl
+terraform-stage/
 
 # Sensitive variable files
 *.tfvars
